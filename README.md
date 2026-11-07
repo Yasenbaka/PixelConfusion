@@ -58,3 +58,7 @@ python -m unittest -v
 测试仅使用程序生成的像素，覆盖坐标映射、长方形和细长图片、透明通道、文件保存，以及两种算法的逐字节往返一致性。
 
 Gilbert 递归划分改编自 [Jakub Červený 的 gilbert2d](https://github.com/jakubcerveny/gilbert)。授权见 `THIRD_PARTY_NOTICES.txt`。
+
+## 许可证
+
+本项目原创代码采用 MIT License，见 `LICENSE`。改编自 gilbert2d 的部分仍为 BSD-2-Clause，见 `THIRD_PARTY_NOTICES.txt`；MIT 许可不改变该部分的原始许可。
