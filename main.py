@@ -53,6 +53,11 @@ def make_demo() -> Image.Image:
 
 
 class App(tk.Tk):
+    # The window chrome (header bar) is always full-bleed; only the content
+    # column is capped and centred so wide windows stay readable.
+    CONTENT_WIDTH = 1320
+    SIDE_PAD = 26
+
     def __init__(self):
         super().__init__()
         self.title("PixelConfusion · 图片混淆与复原")
@@ -121,14 +126,14 @@ class App(tk.Tk):
 
     def _build_interface(self):
         self.page = tk.Frame(self, bg=ui.BG)
-        self.page.place(relx=0.5, y=0, anchor="n", relheight=1.0)
+        self.page.place(x=0, y=0, relwidth=1, relheight=1)
         self.page.grid_columnconfigure(0, weight=1)
         self.page.grid_rowconfigure(1, weight=1)
 
         self._build_appbar(self.page)
 
         main = tk.Frame(self.page, bg=ui.BG)
-        main.grid(row=1, column=0, sticky="nsew", padx=26)
+        main.grid(row=1, column=0, sticky="nsew", padx=self.SIDE_PAD)
         self.main = main
         main.grid_columnconfigure(0, weight=1)
         main.grid_rowconfigure(0, weight=1)
@@ -139,9 +144,11 @@ class App(tk.Tk):
         bar = tk.Frame(parent, bg=ui.SURFACE, height=62)
         bar.grid(row=0, column=0, sticky="ew")
         bar.grid_propagate(False)
+        self.appbar = bar
         tk.Frame(bar, bg=ui.LINE, height=1).place(relx=0, rely=1, anchor="sw", relwidth=1)
         left = tk.Frame(bar, bg=ui.SURFACE)
-        left.pack(side="left", pady=15, padx=(26, 0))
+        left.pack(side="left", pady=15, padx=(self.SIDE_PAD, 0))
+        self.appbar_left = left
         tk.Label(left, image=ui.brand_photo(31), bg=ui.SURFACE, bd=0).pack(side="left")
         self._label(left, "PixelConfusion", 13, "bold", ui.TEXT_BRIGHT, ui.SURFACE).pack(side="left", padx=(10, 0))
         tk.Frame(left, bg=ui.LINE_STRONG, width=1, height=22).pack(side="left", padx=13, pady=4)
@@ -152,7 +159,8 @@ class App(tk.Tk):
                     fg=ui.MUTED, bg=ui.SURFACE).pack(anchor="w", pady=(2, 0))
 
         right = tk.Frame(bar, bg=ui.SURFACE)
-        right.pack(side="right", pady=16, padx=(0, 26))
+        right.pack(side="right", pady=16, padx=(0, self.SIDE_PAD))
+        self.appbar_right = right
         help_button = ui.IconButton(right, "help", command=self._show_help, size=30, icon_size=16,
                                     tooltip="使用说明", outer_bg=ui.SURFACE)
         help_button.pack(side="right", padx=(7, 0))
@@ -349,12 +357,19 @@ class App(tk.Tk):
             self.after_cancel(self._resize_job)
         self._resize_job = self.after(20, self._resize_page)
 
+    def _side_inset(self, width=None):
+        width = self.winfo_width() if width is None else width
+        spare = max(0, width - self.CONTENT_WIDTH) // 2
+        return self.SIDE_PAD + spare
+
     def _resize_page(self):
         self._resize_job = None
         if not self.winfo_exists():
             return
-        width = min(max(1000, self.winfo_width()), 1320)
-        self.page.place_configure(width=width)
+        inset = self._side_inset(self.winfo_width())
+        self.main.grid_configure(padx=inset)
+        self.appbar_left.pack_configure(padx=(inset, 0))
+        self.appbar_right.pack_configure(padx=(0, inset))
 
     # ------------------------------------------------------------ states
     def _set_steps(self, active):
