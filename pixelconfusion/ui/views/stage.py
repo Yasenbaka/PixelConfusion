@@ -98,7 +98,7 @@ class StageView(Card):
         self.input_tile.set_image(image)
 
     def reset_result(self) -> None:
-        self.output_tile.set_empty("结果会出现在这里", "点击混淆或复原开始处理", "sparkles")
+        self.output_tile.set_empty("结果会出现在这里", "点击正向混淆或反向混淆开始处理", "sparkles")
         self.output_tile.set_dims("— × —")
         self.progress.set(0)
 

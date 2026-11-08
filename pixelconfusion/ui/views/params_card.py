@@ -94,7 +94,7 @@ class ParamsCard(Card):
         if gilbert:
             self.method_desc.configure(text="广义希尔伯特曲线 · 支持任意宽高",
                                        fg=MUTED)
-            self.hint.set_text("复原时请保持次数与偏移量一致；留空自动使用默认黄金比例偏移。")
+            self.hint.set_text("反向混淆（复原）请保持相同次数与偏移量；默认使用黄金比例偏移。")
             self.ab_frame.place_forget()
             self.offset_frame.place(x=0, y=0, relwidth=1, height=60)
         else:
@@ -104,7 +104,7 @@ class ParamsCard(Card):
                 text="标准猫映射 · 仅支持正方形图片",
                 fg=PINK if bad_size else MUTED,
             )
-            self.hint.set_text("复原时请保持次数、a、b 一致；坐标变换仅在正方形图片上成立。")
+            self.hint.set_text("反向混淆（复原）请保持相同次数、a、b；仅支持正方形图片。")
             self.offset_frame.place_forget()
             self.ab_frame.place(x=0, y=0, relwidth=1, height=60)
 

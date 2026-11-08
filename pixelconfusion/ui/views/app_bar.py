@@ -30,7 +30,7 @@ class AppBar(tk.Frame):
                    SURFACE).pack(anchor="w")
         make_label(
             title_block,
-            "打乱像素顺序，再用相同的参数完整还原。所有处理都在本机完成。",
+            "正向混淆打乱像素，反向混淆用相同参数还原。所有处理都在本机完成。",
             8,
             fg=MUTED,
             bg=SURFACE,

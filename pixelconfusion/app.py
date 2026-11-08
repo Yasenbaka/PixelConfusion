@@ -58,7 +58,7 @@ class App(tk.Tk):
         self.source_path: Path | None = None
         self.source_name = ""
         self.source_stem = "catmap-demo"
-        self.result_action = "scrambled"
+        self.result_action = "forward"
         self._busy = False
         self._operation: str | None = None
         self._engine = Transformer()
@@ -159,7 +159,7 @@ class App(tk.Tk):
         self.source_name = name or (path.name if path else "内置测试图")
         self.source_stem = Path(self.source_name).stem or "catmap-demo"
         self.result_image = None
-        self.result_action = "scrambled"
+        self.result_action = "forward"
         suffix = path.suffix.lstrip(".").upper() if path else "PNG"
         meta = f"{image.width} × {image.height} · {suffix}"
         if path:
@@ -232,9 +232,9 @@ class App(tk.Tk):
             return
 
         image = self.source_image
-        label = "复原" if action == "restore" else "混淆"
+        label = "反向混淆" if action == "restore" else "正向混淆"
         self._operation = "transform"
-        self._set_status(f"正在{label}图片…", "busy")
+        self._set_status(f"正在{label}…", "busy")
         self._set_source_pill("处理中", "busy")
         self.stage.begin_busy(label)
         self._update_steps()
@@ -259,7 +259,7 @@ class App(tk.Tk):
     def _save(self) -> None:
         if self.result_image is None or self._busy:
             return
-        suffix = "restored" if self.result_action == "restored" else "scrambled"
+        suffix = "reverse" if self.result_action == "reverse" else "forward"
         path = filedialog.asksaveasfilename(
             parent=self,
             title="保存处理结果",
@@ -330,7 +330,7 @@ class App(tk.Tk):
                 elif payload[0] == "result":
                     _, image, action, label, elapsed = payload
                     self.result_image = image
-                    self.result_action = "restored" if action == "restore" else "scrambled"
+                    self.result_action = "reverse" if action == "restore" else "forward"
                     self.stage.show_result(image)
                     self._set_source_pill("已载入", "loaded")
                     self.stage.set_progress(1.0)
@@ -354,7 +354,9 @@ class App(tk.Tk):
             "使用说明",
             "选择一张普通图片，或使用内置测试图。\n\n"
             "Gilbert 支持任意宽高；Arnold 需要正方形图片。\n"
-            "混淆和复原时请使用相同的次数与参数。\n\n"
+            "正向混淆和反向混淆是同一置换的两个方向，反向混淆即复原。\n"
+            "对未混淆的图片点反向混淆，也会得到一张混淆图，这是正常现象。\n\n"
+            "两个方向请使用相同的次数与参数。\n\n"
             "所有处理都在本机完成，不会上传任何文件。",
             parent=self,
         )

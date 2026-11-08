@@ -13,6 +13,9 @@ from pixelconfusion.ui.theme import (
     INK,
     LINE,
     MUTED,
+    ROSE,
+    ROSE_BORDER,
+    ROSE_HOVER,
     SURFACE_ALT,
     TEXT,
     WHITE,
@@ -56,6 +59,9 @@ class PillButton(tk.Canvas):
         if self._kind == "primary":
             fill = ACCENT_HOVER if self._hover else INK
             return fill, WHITE, WHITE
+        if self._kind == "rose":
+            fill = ROSE_HOVER if self._hover else ROSE
+            return fill, WHITE, WHITE
         if self._kind == "secondary":
             fill = "#414449" if self._hover else "#35373b"
             return fill, TEXT, TEXT
@@ -72,6 +78,8 @@ class PillButton(tk.Canvas):
             outline = "#5c6066" if self._hover else "#4a4d52"
         elif self._kind == "primary" and self._enabled:
             outline = "#6ea4ff" if self._hover else ACCENT_BORDER
+        elif self._kind == "rose" and self._enabled:
+            outline = ROSE_BORDER
         elif not self._enabled and self._kind != "ghost":
             outline = LINE
         draw_round(self, 2, 2, width - 2, height - 2, 5, fill, outline)

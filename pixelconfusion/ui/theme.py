@@ -6,7 +6,8 @@ import tkinter as tk
 import tkinter.font as tkfont
 
 # Palette follows the FileExplorer reference: graphite surfaces, thin borders,
-# a single blue accent, yellow warnings and a muted red for failures.
+# a blue primary accent plus a rose action accent, yellow warnings and a muted
+# red for failures.
 BG = "#1e1f22"
 SURFACE = "#25272a"
 SURFACE_ALT = "#2b2d30"
@@ -21,6 +22,9 @@ LINE_STRONG = "#45484d"
 SELECT = "#354968"
 GREEN = "#6ea4ff"
 PINK = "#f2bd45"
+ROSE = "#ee2a7b"
+ROSE_HOVER = "#f4568f"
+ROSE_BORDER = "#ff6aa5"
 RED = "#e65b63"
 WHITE = "#ffffff"
 ACCENT_HOVER = "#3c76ff"
@@ -64,6 +68,9 @@ __all__ = [
     "MUTED",
     "PINK",
     "RED",
+    "ROSE",
+    "ROSE_BORDER",
+    "ROSE_HOVER",
     "SELECT",
     "SURFACE",
     "SURFACE_ALT",

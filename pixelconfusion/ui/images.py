@@ -15,11 +15,24 @@ _icon_photos: dict[tuple[str, str, int], ImageTk.PhotoImage] = {}
 _icon_bases: dict[str, Image.Image] = {}
 _brand_cache: dict[int, ImageTk.PhotoImage] = {}
 
+# Directional arrows reuse the existing arrow glyph so the stroke style stays
+# consistent; rotating the alpha mask is lossless.
+_ROTATED_ICONS = {
+    "arrow-right": ("arrow-down", Image.Transpose.ROTATE_90),
+    "arrow-left": ("arrow-down", Image.Transpose.ROTATE_270),
+}
+
 
 def _base_icon(name: str) -> Image.Image:
     base = _icon_bases.get(name)
     if base is None:
-        base = Image.open(ICON_DIR / f"{name}.png").convert("RGBA")
+        rotation = _ROTATED_ICONS.get(name)
+        if rotation is None:
+            base = Image.open(ICON_DIR / f"{name}.png").convert("RGBA")
+        else:
+            source, turn = rotation
+            base = (Image.open(ICON_DIR / f"{source}.png")
+                    .convert("RGBA").transpose(turn))
         _icon_bases[name] = base
     return base
 
