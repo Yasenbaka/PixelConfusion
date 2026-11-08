@@ -1,4 +1,4 @@
-The Gilbert recursive subdivision in core.py is adapted from:
+The Gilbert recursive subdivision in pixelconfusion/core/gilbert.py is adapted from:
 https://github.com/jakubcerveny/gilbert/blob/master/gilbert2d.py
 
 BSD 2-Clause License

@@ -7,8 +7,15 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from core import (Transformer, arnold_transform, default_offset, gilbert_order,
-                  gilbert_transform, load_image, save_png)
+from pixelconfusion.core import (
+    Transformer,
+    arnold_transform,
+    default_offset,
+    gilbert_order,
+    gilbert_transform,
+    load_image,
+    save_png,
+)
 
 
 class PermutationTests(unittest.TestCase):
@@ -36,9 +43,12 @@ class PermutationTests(unittest.TestCase):
             original = self.rng.integers(0, 256, (height, width, 4), dtype=np.uint8)
             image = Image.fromarray(original)
             for iterations, offset in [(1, None), (7, -11), (29, 0), (3, 10**30)]:
-                with self.subTest(size=(width, height), iterations=iterations, offset=offset):
-                    encrypted = engine.apply(image, action="scramble", iterations=iterations, offset=offset)
-                    restored = engine.apply(encrypted, action="restore", iterations=iterations, offset=offset)
+                with self.subTest(size=(width, height),
+                                  iterations=iterations, offset=offset):
+                    encrypted = engine.apply(image, action="scramble",
+                                             iterations=iterations, offset=offset)
+                    restored = engine.apply(encrypted, action="restore",
+                                            iterations=iterations, offset=offset)
                     np.testing.assert_array_equal(np.array(restored), original)
                     np.testing.assert_array_equal(np.array(image), original)
 

@@ -8,7 +8,24 @@
 python main.py
 ```
 
-程序会打开本地窗口。选图和处理均在电脑上完成。界面视觉层在 `ui.py`，图标资源在 `assets/icons/`。
+程序会打开本地窗口。选图和处理均在电脑上完成。入口为 `main.py`，业务代码按职责拆在 `pixelconfusion/`：
+
+```text
+pixelconfusion/
+├── app.py              # 窗口、状态与交互控制
+├── core/               # Gilbert / Arnold 算法、变换器、图片读写
+├── ui/
+│   ├── theme.py        # 配色与字体
+│   ├── drawing.py      # 圆角绘制原语
+│   ├── images.py       # 图标、品牌图与预览图生成
+│   ├── text.py         # 文本与省略工具
+│   ├── widgets/        # 自绘基础控件
+│   └── views/          # 顶栏、来源卡、参数卡、操作区、预览区
+├── parameters.py       # 侧栏参数校验
+└── tasks.py            # 后台任务与事件队列
+```
+
+图标资源在 `assets/icons/`，测试在 `tests/`。
 
 ## 快速测试
 
@@ -55,7 +72,7 @@ python -m pip install -r requirements.txt
 python -m unittest -v
 ```
 
-测试仅使用程序生成的像素，覆盖坐标映射、长方形和细长图片、透明通道、文件保存，以及两种算法的逐字节往返一致性。
+测试仅使用程序生成的像素，覆盖坐标映射、长方形和细长图片、透明通道、文件保存、两种算法的逐字节往返一致性，以及侧栏参数校验。
 
 Gilbert 递归划分改编自 [Jakub Červený 的 gilbert2d](https://github.com/jakubcerveny/gilbert)。授权见 `THIRD_PARTY_NOTICES.txt`。
 
