@@ -158,8 +158,8 @@ class App(tk.Tk):
     def _set_status(self, text: str, tone: str = "idle") -> None:
         self.stage.set_status(text, tone)
 
-    def _set_source_pill(self, text: str, tone: str) -> None:
-        self.source_card.set_pill(text, tone)
+    def _set_source_state(self, text: str, tone: str) -> None:
+        self.source_card.set_state(text, tone)
 
     def _batch_end(self) -> int:
         return self.batch_start + self.batch_count - 1
@@ -200,7 +200,7 @@ class App(tk.Tk):
         self.source_name = ""
         self.result_image = None
         self.source_card.show_empty()
-        self.source_card.set_pill("未选择", "idle")
+        self.source_card.set_state("未选择", "idle")
         self.stage.set_source_empty()
         self.stage.reset_result()
         self._reset_batch_state()
@@ -238,7 +238,7 @@ class App(tk.Tk):
             return
         self._operation = "source"
         self._set_status("正在读取图片…", "busy")
-        self._set_source_pill("读取中", "busy")
+        self._set_source_state("读取中", "busy")
         self._start_worker(lambda: ("source", load_image(path), Path(path)))
 
     def _use_demo(self) -> None:
@@ -264,7 +264,7 @@ class App(tk.Tk):
                 pass
         self.source_card.show_loaded(thumbnail_photo(image, 56), self.source_name,
                                      meta)
-        self._set_source_pill("已载入", "loaded")
+        self._set_source_state("已载入", "loaded")
         self.stage.set_source_image(image)
         self._show_empty_result()
         self._reset_batch_state()
@@ -282,7 +282,7 @@ class App(tk.Tk):
         self.source_stem = "catmap-demo"
         self.result_image = None
         self.source_card.show_empty()
-        self._set_source_pill("未选择", "idle")
+        self._set_source_state("未选择", "idle")
         self.stage.set_source_empty()
         self.stage.reset_result()
         self._reset_batch_state()
@@ -416,7 +416,7 @@ class App(tk.Tk):
         label = "反向混淆" if action == "restore" else "正向混淆"
         self._operation = "transform"
         self._set_status(f"正在{label}…", "busy")
-        self._set_source_pill("处理中", "busy")
+        self._set_source_state("处理中", "busy")
         self.stage.begin_busy(label)
         self._update_steps()
 
@@ -479,7 +479,7 @@ class App(tk.Tk):
         self._operation = "batch"
         self._set_status(
             f"正在生成第 {index} 批 · {start}–{request.end} 次…", "busy")
-        self._set_source_pill("处理中", "busy")
+        self._set_source_state("处理中", "busy")
         self.stage.begin_batch(
             auto=self.auto_mixed,
             direction=self.batch_direction or "forward",
@@ -732,7 +732,7 @@ class App(tk.Tk):
             self.result_image = image
             self.result_action = "reverse" if action == "restore" else "forward"
             self.stage.show_result(image)
-            self._set_source_pill("已载入", "loaded")
+            self._set_source_state("已载入", "loaded")
             self.stage.set_progress(1.0)
             self._set_status(
                 f"{label}完成 · {image.width} × {image.height} · {elapsed:.2f} 秒",
@@ -748,7 +748,7 @@ class App(tk.Tk):
             self.stage.finish_batch(auto=self.auto_mixed, index=index,
                                     start=start, count=count)
             self.stage.set_progress(1.0)
-            self._set_source_pill("已载入", "loaded")
+            self._set_source_state("已载入", "loaded")
             if len(actions) == 2:
                 summary = f"正反各 {count} 张"
             else:
@@ -816,20 +816,20 @@ class App(tk.Tk):
                                     index=self.batch_index,
                                     start=self.batch_start,
                                     count=max(1, self.batch_count))
-            self._set_source_pill("已载入", "loaded")
+            self._set_source_state("已载入", "loaded")
             self._set_status("批量处理未完成 · 请检查输入图片或参数", "error")
         elif operation == "transform":
             if self.result_image is not None:
                 self.stage.show_result(self.result_image)
             else:
                 self._show_empty_result()
-            self._set_source_pill("已载入", "loaded")
+            self._set_source_state("已载入", "loaded")
             self._set_status("操作未完成 · 请检查输入图片或参数", "error")
         elif self.source_image is not None:
-            self._set_source_pill("已载入", "loaded")
+            self._set_source_state("已载入", "loaded")
             self._set_status("操作未完成 · 请检查输入图片或参数", "error")
         else:
-            self._set_source_pill("未选择", "idle")
+            self._set_source_state("未选择", "idle")
             self._set_status("操作未完成 · 请选择图片或检查参数", "error")
         self._update_steps()
         self._refresh_controls()

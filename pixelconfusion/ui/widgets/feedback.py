@@ -93,9 +93,10 @@ class HintBox(tk.Canvas):
         width = max(self.winfo_width(), 2)
         height = max(self.winfo_height(), 2)
         draw_round(self, 2, 2, width - 2, height - 2, 6, FIELD, LINE)
-        self.create_image(14, 15, image=icon_photo("info", MUTED, 13), anchor="w")
-        self.create_text(33, 9, text=self._text, fill=MUTED, font=ui_font(8),
-                         width=max(20, width - 44), anchor="nw")
+        self.create_image(14, height / 2, image=icon_photo("info", MUTED, 13),
+                          anchor="w")
+        self.create_text(33, height / 2, text=self._text, fill=MUTED,
+                         font=ui_font(8), width=max(20, width - 44), anchor="w")
 
     def set_text(self, text):
         self._text = text

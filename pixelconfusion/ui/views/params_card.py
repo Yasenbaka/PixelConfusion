@@ -77,7 +77,7 @@ class ParamsCard(Card):
             else:
                 self.b_field = field
 
-        self.hint = HintBox(body, height=58, outer_bg=SURFACE)
+        self.hint = HintBox(body, height=40, outer_bg=SURFACE)
         self.hint.pack(fill="x", pady=(12, 12))
 
         self.show_method("gilbert", None)
@@ -100,12 +100,12 @@ class ParamsCard(Card):
         self._mode = mode
         if mode == "batch":
             self.iterations_block.pack_forget()
-            self.configure(height=288)
+            self.configure(height=270)
         else:
             if not self.iterations_block.winfo_manager():
                 self.iterations_block.pack(fill="x", pady=(12, 0),
                                            before=self.param_block)
-            self.configure(height=360)
+            self.configure(height=342)
         self.show_method(self._method, self._source_image)
 
     def show_method(self, method: str, source_image) -> None:
@@ -116,9 +116,9 @@ class ParamsCard(Card):
             self.method_desc.configure(text="广义希尔伯特曲线 · 支持任意宽高",
                                        fg=MUTED)
             if self._mode == "batch":
-                text = "反向混淆（复原）请保持相同偏移量；批量次数由下方“等差迭代次数”控制。"
+                text = "批量次数由下方“等差迭代次数”控制。"
             else:
-                text = "反向混淆（复原）请保持相同次数与偏移量；默认使用黄金比例偏移。"
+                text = "默认使用黄金比例偏移。"
             self.hint.set_text(text)
             self.ab_frame.place_forget()
             self.offset_frame.place(x=0, y=0, relwidth=1, height=60)
@@ -130,9 +130,9 @@ class ParamsCard(Card):
                 fg=PINK if bad_size else MUTED,
             )
             if self._mode == "batch":
-                text = "反向混淆（复原）请保持相同 a、b；批量次数由下方控制；仅支持正方形图片。"
+                text = "批量次数由下方控制；仅支持正方形图片。"
             else:
-                text = "反向混淆（复原）请保持相同次数、a、b；仅支持正方形图片。"
+                text = "仅支持正方形图片。"
             self.hint.set_text(text)
             self.offset_frame.place_forget()
             self.ab_frame.place(x=0, y=0, relwidth=1, height=60)

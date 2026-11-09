@@ -227,26 +227,26 @@ class DropZone(tk.Canvas):
                          fill=FAINT, font=ui_font(7))
 
     def _draw_compact(self, width, height):
-        main_font = ui_font(9, "bold")
-        sub_font = ui_font(8)
-        main_text = "选择一张图片"
-        sub_text = "PNG / JPG / WEBP / BMP · 单帧"
-        icon_width = 14
-        gap = 7
-        sub_gap = 9
-        total = (icon_width + gap + main_font.measure(main_text)
-                 + sub_gap + sub_font.measure(sub_text))
-        start = max(12, (width - total) / 2)
-        center = height / 2
-        self.create_image(start + icon_width / 2, center,
+        title_font = ui_font(9, "bold")
+        sub_font = ui_font(7)
+        title = "选择一张图片"
+        subtitle = "PNG / JPG / WEBP / BMP · 单帧"
+        tile = 32
+        gap = 11
+        text_width = max(title_font.measure(title), sub_font.measure(subtitle))
+        start = max(14, (width - tile - gap - text_width) / 2)
+        middle = height / 2
+        draw_round(self, start, middle - tile / 2, start + tile,
+                   middle + tile / 2, 7, SURFACE_ALT, LINE)
+        self.create_image(start + tile / 2, middle,
                           image=icon_photo("image",
-                                           MUTED if self._enabled else FAINT, 14))
-        main_x = start + icon_width + gap
-        self.create_text(main_x, center, text=main_text,
+                                           MUTED if self._enabled else FAINT, 15))
+        text_x = start + tile + gap
+        self.create_text(text_x, middle - 8, text=title,
                          fill=TEXT if self._enabled else MUTED,
-                         font=main_font, anchor="w")
-        self.create_text(main_x + main_font.measure(main_text) + sub_gap, center,
-                         text=sub_text, fill=FAINT, font=sub_font, anchor="w")
+                         font=title_font, anchor="w")
+        self.create_text(text_x, middle + 9, text=subtitle, fill=FAINT,
+                         font=sub_font, anchor="w")
 
     def _enter(self, _event):
         self._hover = True

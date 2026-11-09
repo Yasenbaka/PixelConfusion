@@ -6,91 +6,127 @@ import tkinter as tk
 
 from pixelconfusion.ui.text import ellipsize, make_label
 from pixelconfusion.ui.theme import BG, FAINT, LINE_STRONG, MUTED, PINK, SURFACE
-from pixelconfusion.ui.widgets import Card, DropZone, IconButton, Pill, TextLink
+from pixelconfusion.ui.widgets import (
+    Card,
+    DropZone,
+    IconButton,
+    Pill,
+    PillButton,
+    TextLink,
+)
+
+_LOADED_DOT = "#4d8df7"
 
 
 class SourceCard(Card):
     def __init__(self, master, *, on_pick, on_clear, on_demo, outer_bg=BG):
-        super().__init__(master, height=100, outer_bg=outer_bg)
+        super().__init__(master, height=92, outer_bg=outer_bg)
         self._thumb_photo = None
+        self._enabled = True
+        self._loaded = False
+        self._on_pick = on_pick
 
-        body = tk.Frame(self.content, bg=SURFACE, height=64)
-        body.pack(fill="both", expand=True, padx=6, pady=6)
-        body.pack_propagate(False)
+        body = tk.Frame(self.content, bg=SURFACE)
+        body.pack(fill="both", expand=True, padx=(12, 12))
+        body.grid_rowconfigure(0, weight=1)
+        body.grid_columnconfigure(1, weight=1)
 
-        title_block = tk.Frame(body, bg=SURFACE, width=96)
-        title_block.pack(side="left", fill="y", padx=(0, 12))
-        title_block.pack_propagate(False)
-        make_label(title_block, "来源图片", 9, "bold").pack(anchor="w", pady=(7, 0))
-        self.source_pill = Pill(title_block, "未选择", bg="#35373b", fg=MUTED,
-                                dot=FAINT, height=20, border=LINE_STRONG)
-        self.source_pill.pack(anchor="w", pady=(4, 0))
+        self.thumb_label = tk.Label(body, bg=SURFACE, bd=0)
+        self.thumb_label.bind("<ButtonRelease-1>", self._thumb_clicked)
 
-        self.demo_link = TextLink(body, "使用内置测试图", command=on_demo,
-                                  outer_bg=SURFACE)
-        self.demo_link.pack(side="right", pady=(21, 0))
-
-        self.content_area = tk.Frame(body, bg=SURFACE)
-        self.content_area.pack(side="left", fill="both", expand=True)
-
-        self.dropzone = DropZone(self.content_area, command=on_pick,
-                                 outer_bg=SURFACE, compact=True)
-        self.loaded_row = tk.Frame(self.content_area, bg=SURFACE)
-        self.thumb_label = tk.Label(self.loaded_row, bg=SURFACE, bd=0)
-        self.thumb_label.pack(side="left", padx=(0, 12), pady=4)
-        info = tk.Frame(self.loaded_row, bg=SURFACE)
-        info.pack(side="left", fill="both", expand=True, padx=(0, 10))
-        self.file_name_label = make_label(info, "", 9, "bold", anchor="w",
+        info = tk.Frame(body, bg=SURFACE)
+        self._info = info
+        make_label(info, "来源图片", 7, fg=FAINT).pack(anchor="w")
+        name_row = tk.Frame(info, bg=SURFACE)
+        name_row.pack(anchor="w", pady=(2, 0))
+        self.file_name_label = make_label(name_row, "", 9, "bold", anchor="w",
                                           justify="left")
-        self.file_name_label.pack(anchor="w", pady=(8, 0))
+        self.file_name_label.pack(side="left")
+        self.state_tag = Pill(name_row, "已载入", bg=SURFACE, fg=MUTED,
+                              dot=_LOADED_DOT, height=18, pad=1,
+                              border=SURFACE)
+        self.state_tag.pack(side="left", padx=(9, 0))
         self.file_meta_label = make_label(info, "", 8, fg=FAINT, anchor="w")
         self.file_meta_label.pack(anchor="w", pady=(3, 0))
-        actions = tk.Frame(self.loaded_row, bg=SURFACE)
-        actions.pack(side="right", fill="y")
-        self.replace_button = IconButton(actions, "upload", command=on_pick, size=24,
-                                         icon_size=14, tooltip="更换图片",
-                                         outer_bg=SURFACE)
-        self.replace_button.pack(side="left", pady=20)
-        self.clear_button = IconButton(actions, "x", command=on_clear, size=24,
-                                       icon_size=14, tooltip="清空图片",
+
+        self.dropzone = DropZone(body, command=on_pick, outer_bg=SURFACE,
+                                 compact=True)
+
+        actions = tk.Frame(body, bg=SURFACE)
+        actions.grid(row=0, column=2, sticky="e", padx=(16, 2))
+        self.replace_button = PillButton(actions, "更换图片", command=on_pick,
+                                         icon="upload", kind="secondary",
+                                         small=True, height=30, outer_bg=SURFACE)
+        self.clear_button = IconButton(actions, "x", command=on_clear, size=30,
+                                       icon_size=15, tooltip="清空图片",
                                        outer_bg=SURFACE)
-        self.clear_button.pack(side="left", padx=(3, 0), pady=20)
+        self._divider = tk.Frame(actions, bg=LINE_STRONG, width=1, height=22)
+        self.demo_link = TextLink(actions, "使用内置测试图", command=on_demo,
+                                  outer_bg=SURFACE)
 
         self.show_empty()
 
     def show_empty(self) -> None:
-        if not self.dropzone.winfo_manager():
-            self.dropzone.pack(fill="both", expand=True)
-        self.loaded_row.pack_forget()
+        self._loaded = False
+        self.thumb_label.grid_remove()
+        self._info.grid_remove()
+        self._pack_file_actions(False)
+        self.dropzone.grid(row=0, column=0, columnspan=2, sticky="nsew")
         self._thumb_photo = None
         self.thumb_label.configure(image="")
+        self.thumb_label.configure(cursor="")
         self.demo_link.set_text("使用内置测试图")
 
     def show_loaded(self, photo, name: str, meta: str) -> None:
+        self._loaded = True
         self._thumb_photo = photo
         self.thumb_label.configure(image=photo)
-        self.file_name_label.configure(text=ellipsize(name, 300, 9, "bold"))
+        self.file_name_label.configure(text=ellipsize(name, 480, 9, "bold"))
         self.file_meta_label.configure(text=ellipsize(meta, 360, 8))
-        self.dropzone.pack_forget()
-        self.loaded_row.pack(fill="both", expand=True)
+        self.dropzone.grid_remove()
+        self.thumb_label.grid(row=0, column=0, sticky="w", padx=(2, 12))
+        self._info.grid(row=0, column=1, sticky="ew")
+        self._pack_file_actions(True)
+        self.thumb_label.configure(cursor="hand2" if self._enabled else "")
         self.demo_link.set_text("换成内置测试图")
 
-    def set_pill(self, text: str, tone: str) -> None:
+    def set_state(self, text: str, tone: str) -> None:
         if tone == "loaded":
-            self.source_pill.update_pill(text, bg="#2f405c", fg="#cfe0ff",
-                                         dot="#4d8df7", border="#47709f")
+            foreground, dot = MUTED, _LOADED_DOT
         elif tone == "busy":
-            self.source_pill.update_pill(text, bg="#3a3322", fg=PINK,
-                                         dot=PINK, border="#5c4a22")
+            foreground, dot = PINK, PINK
         else:
-            self.source_pill.update_pill(text, bg="#35373b", fg=MUTED,
-                                         dot=FAINT, border=LINE_STRONG)
+            foreground, dot = MUTED, FAINT
+        self.state_tag.update_pill(text, bg=SURFACE, fg=foreground, dot=dot,
+                                   border=SURFACE)
 
     def set_enabled(self, enabled: bool) -> None:
-        self.dropzone.set_enabled(enabled)
-        self.demo_link.set_enabled(enabled)
-        self.replace_button.set_enabled(enabled)
-        self.clear_button.set_enabled(enabled)
+        self._enabled = bool(enabled)
+        self.dropzone.set_enabled(self._enabled)
+        self.demo_link.set_enabled(self._enabled)
+        self.replace_button.set_enabled(self._enabled)
+        self.clear_button.set_enabled(self._enabled)
+        self.thumb_label.configure(
+            cursor="hand2" if self._enabled and self._loaded else "")
+
+    # --------------------------------------------------------------- private
+    def _pack_file_actions(self, visible: bool) -> None:
+        if visible:
+            self.replace_button.pack(side="left", before=self.demo_link)
+            self.clear_button.pack(side="left", padx=(6, 0),
+                                   before=self.demo_link)
+            self._divider.pack(side="left", padx=(13, 13), pady=(4, 0),
+                               before=self.demo_link)
+        else:
+            self.replace_button.pack_forget()
+            self.clear_button.pack_forget()
+            self._divider.pack_forget()
+            if not self.demo_link.winfo_manager():
+                self.demo_link.pack(side="left", pady=(4, 0))
+
+    def _thumb_clicked(self, _event) -> None:
+        if self._enabled and self._loaded and self._on_pick:
+            self._on_pick()
 
 
 __all__ = ["SourceCard"]
