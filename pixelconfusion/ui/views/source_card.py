@@ -1,4 +1,4 @@
-"""Source-image card: drop zone, loaded thumbnail and demo shortcut."""
+"""Full-width source strip below the application header."""
 
 from __future__ import annotations
 
@@ -11,31 +11,38 @@ from pixelconfusion.ui.widgets import Card, DropZone, IconButton, Pill, TextLink
 
 class SourceCard(Card):
     def __init__(self, master, *, on_pick, on_clear, on_demo, outer_bg=BG):
-        super().__init__(master, height=206, outer_bg=outer_bg)
+        super().__init__(master, height=100, outer_bg=outer_bg)
         self._thumb_photo = None
 
-        body = tk.Frame(self.content, bg=SURFACE)
+        body = tk.Frame(self.content, bg=SURFACE, height=64)
         body.pack(fill="both", expand=True, padx=6, pady=6)
-        header = tk.Frame(body, bg=SURFACE, height=22)
-        header.pack(fill="x")
-        header.pack_propagate(False)
-        make_label(header, "来源图片", 9, "bold").pack(side="left")
-        self.source_pill = Pill(header, "未选择", bg="#35373b", fg=MUTED,
-                                dot=FAINT, height=20, border=LINE_STRONG)
-        self.source_pill.pack(side="right")
+        body.pack_propagate(False)
 
-        holder = tk.Frame(body, bg=SURFACE, height=108)
-        holder.pack(fill="x", pady=(8, 0))
-        holder.pack_propagate(False)
-        self.dropzone = DropZone(holder, command=on_pick, outer_bg=SURFACE)
-        self.loaded_row = tk.Frame(holder, bg=SURFACE)
+        title_block = tk.Frame(body, bg=SURFACE, width=96)
+        title_block.pack(side="left", fill="y", padx=(0, 12))
+        title_block.pack_propagate(False)
+        make_label(title_block, "来源图片", 9, "bold").pack(anchor="w", pady=(7, 0))
+        self.source_pill = Pill(title_block, "未选择", bg="#35373b", fg=MUTED,
+                                dot=FAINT, height=20, border=LINE_STRONG)
+        self.source_pill.pack(anchor="w", pady=(4, 0))
+
+        self.demo_link = TextLink(body, "使用内置测试图", command=on_demo,
+                                  outer_bg=SURFACE)
+        self.demo_link.pack(side="right", pady=(21, 0))
+
+        self.content_area = tk.Frame(body, bg=SURFACE)
+        self.content_area.pack(side="left", fill="both", expand=True)
+
+        self.dropzone = DropZone(self.content_area, command=on_pick,
+                                 outer_bg=SURFACE, compact=True)
+        self.loaded_row = tk.Frame(self.content_area, bg=SURFACE)
         self.thumb_label = tk.Label(self.loaded_row, bg=SURFACE, bd=0)
-        self.thumb_label.pack(side="left")
+        self.thumb_label.pack(side="left", padx=(0, 12), pady=4)
         info = tk.Frame(self.loaded_row, bg=SURFACE)
-        info.pack(side="left", fill="both", expand=True, padx=(12, 4))
+        info.pack(side="left", fill="both", expand=True, padx=(0, 10))
         self.file_name_label = make_label(info, "", 9, "bold", anchor="w",
                                           justify="left")
-        self.file_name_label.pack(anchor="w", pady=(14, 0))
+        self.file_name_label.pack(anchor="w", pady=(8, 0))
         self.file_meta_label = make_label(info, "", 8, fg=FAINT, anchor="w")
         self.file_meta_label.pack(anchor="w", pady=(3, 0))
         actions = tk.Frame(self.loaded_row, bg=SURFACE)
@@ -49,16 +56,12 @@ class SourceCard(Card):
                                        outer_bg=SURFACE)
         self.clear_button.pack(side="left", padx=(3, 0), pady=20)
 
-        self.demo_link = TextLink(body, "使用内置测试图", command=on_demo,
-                                  outer_bg=SURFACE)
-        self.demo_link.pack(anchor="w", pady=(8, 0))
-
         self.show_empty()
 
     def show_empty(self) -> None:
         if not self.dropzone.winfo_manager():
             self.dropzone.pack(fill="both", expand=True)
-        self.loaded_row.place_forget()
+        self.loaded_row.pack_forget()
         self._thumb_photo = None
         self.thumb_label.configure(image="")
         self.demo_link.set_text("使用内置测试图")
@@ -66,10 +69,10 @@ class SourceCard(Card):
     def show_loaded(self, photo, name: str, meta: str) -> None:
         self._thumb_photo = photo
         self.thumb_label.configure(image=photo)
-        self.file_name_label.configure(text=ellipsize(name, 158, 9, "bold"))
-        self.file_meta_label.configure(text=ellipsize(meta, 178, 8))
+        self.file_name_label.configure(text=ellipsize(name, 300, 9, "bold"))
+        self.file_meta_label.configure(text=ellipsize(meta, 360, 8))
         self.dropzone.pack_forget()
-        self.loaded_row.place(relx=0, rely=0.5, anchor="w", relwidth=1, height=64)
+        self.loaded_row.pack(fill="both", expand=True)
         self.demo_link.set_text("换成内置测试图")
 
     def set_pill(self, text: str, tone: str) -> None:

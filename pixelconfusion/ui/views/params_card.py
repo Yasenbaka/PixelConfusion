@@ -19,6 +19,9 @@ from pixelconfusion.ui.widgets import (
 class ParamsCard(Card):
     def __init__(self, master, *, on_method_change, outer_bg=BG):
         super().__init__(master, height=360, outer_bg=outer_bg)
+        self._mode = "single"
+        self._method = "gilbert"
+        self._source_image = None
         self.iterations_var = tk.StringVar(value="1")
         self.offset_var = tk.StringVar(value="")
         self.param_a_var = tk.StringVar(value="1")
@@ -36,9 +39,12 @@ class ParamsCard(Card):
         self.segmented.pack(fill="x", pady=(12, 0))
         self.method_desc = make_label(body, "", 8, fg=MUTED, anchor="w")
         self.method_desc.pack(fill="x", pady=(8, 0))
-        make_label(body, "迭代次数", 8, fg=MUTED).pack(anchor="w", pady=(12, 0))
-        self.stepper = NumberStepper(body, self.iterations_var, 1, MAX_ITERATIONS,
-                                     outer_bg=SURFACE)
+
+        self.iterations_block = tk.Frame(body, bg=SURFACE)
+        self.iterations_block.pack(fill="x", pady=(12, 0))
+        make_label(self.iterations_block, "迭代次数", 8, fg=MUTED).pack(anchor="w")
+        self.stepper = NumberStepper(self.iterations_block, self.iterations_var,
+                                     1, MAX_ITERATIONS, outer_bg=SURFACE)
         self.stepper.pack(fill="x", pady=(4, 0))
 
         self.param_block = tk.Frame(body, bg=SURFACE, height=60)
@@ -89,12 +95,31 @@ class ParamsCard(Card):
         if self.segmented.value != method:
             self.segmented.set(method)
 
+    def set_mode(self, mode: str) -> None:
+        """Hide the single-run iteration field while batch mode is active."""
+        self._mode = mode
+        if mode == "batch":
+            self.iterations_block.pack_forget()
+            self.configure(height=288)
+        else:
+            if not self.iterations_block.winfo_manager():
+                self.iterations_block.pack(fill="x", pady=(12, 0),
+                                           before=self.param_block)
+            self.configure(height=360)
+        self.show_method(self._method, self._source_image)
+
     def show_method(self, method: str, source_image) -> None:
+        self._method = method
+        self._source_image = source_image
         gilbert = method == "gilbert"
         if gilbert:
             self.method_desc.configure(text="广义希尔伯特曲线 · 支持任意宽高",
                                        fg=MUTED)
-            self.hint.set_text("反向混淆（复原）请保持相同次数与偏移量；默认使用黄金比例偏移。")
+            if self._mode == "batch":
+                text = "反向混淆（复原）请保持相同偏移量；批量次数由下方“等差迭代次数”控制。"
+            else:
+                text = "反向混淆（复原）请保持相同次数与偏移量；默认使用黄金比例偏移。"
+            self.hint.set_text(text)
             self.ab_frame.place_forget()
             self.offset_frame.place(x=0, y=0, relwidth=1, height=60)
         else:
@@ -104,7 +129,11 @@ class ParamsCard(Card):
                 text="标准猫映射 · 仅支持正方形图片",
                 fg=PINK if bad_size else MUTED,
             )
-            self.hint.set_text("反向混淆（复原）请保持相同次数、a、b；仅支持正方形图片。")
+            if self._mode == "batch":
+                text = "反向混淆（复原）请保持相同 a、b；批量次数由下方控制；仅支持正方形图片。"
+            else:
+                text = "反向混淆（复原）请保持相同次数、a、b；仅支持正方形图片。"
+            self.hint.set_text(text)
             self.offset_frame.place_forget()
             self.ab_frame.place(x=0, y=0, relwidth=1, height=60)
 

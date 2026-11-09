@@ -23,14 +23,20 @@ from pixelconfusion.ui.theme import (
 
 
 class Segmented(tk.Canvas):
-    def __init__(self, master, value, on_change=None, height=38, outer_bg=None):
+    DEFAULT_OPTIONS = (
+        ("gilbert", "Gilbert", "route"),
+        ("arnold", "Arnold", "grid"),
+    )
+
+    def __init__(self, master, value, options=None, on_change=None, height=38,
+                 outer_bg=None):
         super().__init__(master, bg=outer_bg or parent_background(master),
                          highlightthickness=0, bd=0, height=height, takefocus=0)
         self.value = value
         self._on_change = on_change
         self._enabled = True
         self._hover = None
-        self.options = (("gilbert", "Gilbert", "route"), ("arnold", "Arnold", "grid"))
+        self.options = tuple(options) if options else self.DEFAULT_OPTIONS
         self.bind("<Configure>", lambda _event: self._draw())
         self.bind("<ButtonRelease-1>", self._click)
         self.bind("<Motion>", self._motion)
@@ -43,8 +49,11 @@ class Segmented(tk.Canvas):
         height = max(self.winfo_height(), 2)
         draw_round(self, 2, 2, width - 2, height - 2, 6, FIELD, LINE_STRONG)
         pad = 4
-        cell = (width - pad * 2) / 2
-        for index, (value, label, icon) in enumerate(self.options):
+        count = max(1, len(self.options))
+        cell = (width - pad * 2) / count
+        for index, option in enumerate(self.options):
+            value, label = option[0], option[1]
+            icon = option[2] if len(option) > 2 else None
             x1 = pad + index * cell
             x2 = x1 + cell
             active = value == self.value
@@ -61,12 +70,15 @@ class Segmented(tk.Canvas):
                 color = "#686c72"
                 icon_color = color
             label_font = ui_font(9, "bold" if active else "normal")
-            icon_width = 13
-            total = icon_width + 5 + label_font.measure(label)
+            icon_width = 13 if icon else 0
+            gap = 5 if icon else 0
+            total = icon_width + gap + label_font.measure(label)
             start = (x1 + x2 - total) / 2
-            self.create_image(start, height / 2,
-                              image=icon_photo(icon, icon_color, 13), anchor="w")
-            self.create_text(start + icon_width + 5, height / 2, text=label,
+            if icon:
+                self.create_image(start, height / 2,
+                                  image=icon_photo(icon, icon_color, 13),
+                                  anchor="w")
+            self.create_text(start + icon_width + gap, height / 2, text=label,
                              fill=color, font=label_font, anchor="w")
         if self._enabled:
             self.configure(cursor="hand2")
@@ -75,7 +87,11 @@ class Segmented(tk.Canvas):
         if not self._enabled:
             return
         width = self.winfo_width()
-        value = self.options[0][0] if event.x < width / 2 else self.options[1][0]
+        pad = 4
+        cell = max(1.0, (width - pad * 2) / max(1, len(self.options)))
+        index = int((event.x - pad) // cell)
+        index = max(0, min(len(self.options) - 1, index))
+        value = self.options[index][0]
         if value != self.value:
             self.value = value
             self._draw()

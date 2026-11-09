@@ -190,12 +190,14 @@ class PreviewTile(tk.Frame):
 
 
 class DropZone(tk.Canvas):
-    def __init__(self, master, command=None, height=108, outer_bg=None):
+    def __init__(self, master, command=None, height=108, outer_bg=None,
+                 compact=False):
         super().__init__(master, bg=outer_bg or parent_background(master),
                          highlightthickness=0, bd=0, height=height, takefocus=0)
         self.command = command
         self._hover = False
         self._enabled = True
+        self._compact = compact
         self.bind("<Configure>", lambda _event: self._draw())
         self.bind("<Enter>", self._enter)
         self.bind("<Leave>", self._leave)
@@ -210,6 +212,9 @@ class DropZone(tk.Canvas):
         border = ("#5c6066" if self._hover else LINE_STRONG) if self._enabled else LINE
         draw_round(self, 2, 2, width - 2, height - 2, 6, fill)
         dashed_round(self, 2, 2, width - 2, height - 2, 6, border)
+        if self._compact:
+            self._draw_compact(width, height)
+            return
         center = height / 2
         draw_round(self, width / 2 - 14, center - 33, width / 2 + 14, center - 5,
                    6, SURFACE_ALT, LINE)
@@ -220,6 +225,28 @@ class DropZone(tk.Canvas):
                          font=ui_font(9, "bold"))
         self.create_text(width / 2, center + 27, text="PNG / JPG / WEBP / BMP · 单帧",
                          fill=FAINT, font=ui_font(7))
+
+    def _draw_compact(self, width, height):
+        main_font = ui_font(9, "bold")
+        sub_font = ui_font(8)
+        main_text = "选择一张图片"
+        sub_text = "PNG / JPG / WEBP / BMP · 单帧"
+        icon_width = 14
+        gap = 7
+        sub_gap = 9
+        total = (icon_width + gap + main_font.measure(main_text)
+                 + sub_gap + sub_font.measure(sub_text))
+        start = max(12, (width - total) / 2)
+        center = height / 2
+        self.create_image(start + icon_width / 2, center,
+                          image=icon_photo("image",
+                                           MUTED if self._enabled else FAINT, 14))
+        main_x = start + icon_width + gap
+        self.create_text(main_x, center, text=main_text,
+                         fill=TEXT if self._enabled else MUTED,
+                         font=main_font, anchor="w")
+        self.create_text(main_x + main_font.measure(main_text) + sub_gap, center,
+                         text=sub_text, fill=FAINT, font=sub_font, anchor="w")
 
     def _enter(self, _event):
         self._hover = True

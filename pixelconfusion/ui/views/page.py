@@ -28,6 +28,12 @@ class PageView(tk.Frame):
         on_restore,
         on_use_result,
         on_save,
+        on_iteration_mode_change,
+        on_auto_change,
+        on_next_batch,
+        on_auto_batch,
+        on_auto_next_batch,
+        on_open_result,
     ):
         super().__init__(master, bg=BG)
         self._inset_job = None
@@ -52,6 +58,12 @@ class PageView(tk.Frame):
             on_restore=on_restore,
             on_use_result=on_use_result,
             on_save=on_save,
+            on_iteration_mode_change=on_iteration_mode_change,
+            on_auto_change=on_auto_change,
+            on_next_batch=on_next_batch,
+            on_auto_batch=on_auto_batch,
+            on_auto_next_batch=on_auto_next_batch,
+            on_open_result=on_open_result,
         )
         self.workspace.grid(row=0, column=0, sticky="nsew", pady=(18, 18))
         self.bind("<Configure>", self._schedule_inset)
