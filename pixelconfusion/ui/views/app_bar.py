@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import tkinter as tk
 
-from pixelconfusion.ui.images import brand_photo
+from pixelconfusion.ui.images import brand_lockup_photo
 from pixelconfusion.ui.text import make_label
 from pixelconfusion.ui.theme import LINE, LINE_STRONG, MUTED, SURFACE, TEXT_BRIGHT
 from pixelconfusion.ui.widgets import IconButton, Steps
@@ -19,22 +19,16 @@ class AppBar(tk.Frame):
 
         self._left = tk.Frame(self, bg=SURFACE)
         self._left.pack(side="left", pady=15, padx=(side_pad, 0))
-        tk.Label(self._left, image=brand_photo(31), bg=SURFACE, bd=0).pack(side="left")
-        make_label(self._left, "PixelConfusion", 13, "bold", TEXT_BRIGHT,
-                   SURFACE).pack(side="left", padx=(10, 0))
+        tk.Label(self._left, image=brand_lockup_photo(32), bg=SURFACE,
+                 bd=0).pack(side="left", padx=(0, 4))
         tk.Frame(self._left, bg=LINE_STRONG, width=1, height=22).pack(
             side="left", padx=13, pady=4)
         title_block = tk.Frame(self._left, bg=SURFACE)
         title_block.pack(side="left")
-        make_label(title_block, "图片混淆与复原", 12, "bold", TEXT_BRIGHT,
+        make_label(title_block, "PixelConfusion", 12, "bold", TEXT_BRIGHT,
                    SURFACE).pack(anchor="w")
-        make_label(
-            title_block,
-            "正向混淆打乱像素，反向混淆用相同参数还原。所有处理都在本机完成。",
-            8,
-            fg=MUTED,
-            bg=SURFACE,
-        ).pack(anchor="w", pady=(2, 0))
+        make_label(title_block, "像素混淆器", 8, fg=MUTED,
+                   bg=SURFACE).pack(anchor="w", pady=(2, 0))
 
         self._right = tk.Frame(self, bg=SURFACE)
         self._right.pack(side="right", pady=16, padx=(0, side_pad))

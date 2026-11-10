@@ -47,7 +47,7 @@ class App(tk.Tk):
 
     # ------------------------------------------------------------ state
     def _configure_window(self) -> None:
-        self.title("PixelConfusion · 图片混淆与复原")
+        self.title("PixelConfusion · 像素混淆器")
         self.configure(background=theme.BG)
         self.minsize(1160, 820)
         width, height = 1280, 880

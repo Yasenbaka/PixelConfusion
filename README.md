@@ -26,7 +26,7 @@ pixelconfusion/
 └── tasks.py            # 后台任务与事件队列
 ```
 
-图标资源在 `assets/icons/`，测试在 `tests/`。多次迭代的交互与实现约定见 `docs/batch-iteration.md`。
+图标资源在 `assets/icons/`，品牌标识与软件图标在 `assets/brand/`，测试在 `tests/`。多次迭代的交互与实现约定见 `docs/batch-iteration.md`。
 
 ## 快速测试
 
