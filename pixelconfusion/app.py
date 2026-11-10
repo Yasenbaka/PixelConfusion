@@ -26,6 +26,7 @@ from pixelconfusion.ui.images import brand_photo, thumbnail_photo
 from pixelconfusion.ui.views import PageView
 from pixelconfusion.ui.views.result_preview import ResultPreview
 from pixelconfusion.ui.window import apply_dark_title_bar
+from pixelconfusion.version import VERSION, version_components, window_title
 
 
 class App(tk.Tk):
@@ -47,7 +48,7 @@ class App(tk.Tk):
 
     # ------------------------------------------------------------ state
     def _configure_window(self) -> None:
-        self.title("PixelConfusion · 像素混淆器")
+        self.title(window_title())
         self.configure(background=theme.BG)
         self.minsize(1160, 820)
         width, height = 1280, 880
@@ -848,7 +849,8 @@ class App(tk.Tk):
             "同时查看反向和正向结果集。\n"
             "结果缩略图可点开预览，再选择用作输入或保存 PNG。\n\n"
             "两个方向请使用相同的次数与参数。\n\n"
-            "所有处理都在本机完成，不会上传任何文件。",
+            "所有处理都在本机完成，不会上传任何文件。\n\n"
+            f"版本 {VERSION}（{version_components()}）",
             parent=self,
         )
 

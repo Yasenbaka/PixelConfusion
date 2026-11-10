@@ -8,13 +8,15 @@
 python main.py
 ```
 
-程序会打开本地窗口。选图和处理均在电脑上完成。入口为 `main.py`，业务代码按职责拆在 `pixelconfusion/`：
+程序会打开本地窗口。选图和处理均在电脑上完成。入口为 `main.py`，打包脚本为 `build.py`，业务代码按职责拆在 `pixelconfusion/`：
 
 ```text
 pixelconfusion/
 ├── app.py              # 窗口、状态与交互控制
 ├── batch.py            # 批量结果记录
+├── console.py          # 控制台输出编码
 ├── core/               # Gilbert / Arnold 算法、变换器、图片读写
+├── paths.py            # 源码与打包后的资源路径
 ├── ui/
 │   ├── theme.py        # 配色与字体
 │   ├── drawing.py      # 圆角绘制原语
@@ -23,7 +25,8 @@ pixelconfusion/
 │   ├── widgets/        # 自绘基础控件（含结果网格与开关）
 │   └── views/          # 顶栏、来源条、参数卡、迭代方式、操作区、预览区
 ├── parameters.py       # 侧栏与批量参数校验
-└── tasks.py            # 后台任务与事件队列
+├── tasks.py            # 后台任务与事件队列
+└── version.py          # 版本号与版本来源解析
 ```
 
 图标资源在 `assets/icons/`，品牌标识与软件图标在 `assets/brand/`，测试在 `tests/`。多次迭代的交互与实现约定见 `docs/batch-iteration.md`。
@@ -81,13 +84,79 @@ python -m pip install -r requirements.txt
 
 需要 Python 3.10 或更新版本，以及 Tkinter（Windows 官方 Python 安装程序通常包含）。
 
+## 版本号
+
+版本号采用 `大更新.中期更新.小更新` 的三段格式，例如 `1.0.0`：大更新调整整体架构或交互方式，中期更新新增功能并保持兼容，小更新修复问题和调整细节。
+
+版本号默认写在 `pixelconfusion/version.py` 的 `VERSION_PARTS` 中，修改版本只需改这一行：
+
+```python
+VERSION_PARTS: tuple[int, int, int] = (1, 0, 0)  # (大更新, 中期更新, 小更新)
+```
+
+打包时也可以不修改代码，按以下优先级指定版本号：
+
+1. `python build.py --version 1.0.0`：只对本次打包生效；
+2. 环境变量 `PIXELCONFUSION_VERSION`；
+3. 项目根目录的 `version.json`，内容为 `{"version": "1.0.0"}`；
+4. `pixelconfusion/version.py` 中的 `VERSION_PARTS`。
+
+打包脚本会把最终版本号写入可执行文件名、Windows 文件属性、窗口标题和程序内的 `--version` 输出，几处始终一致。运行中版本号显示在窗口标题、顶栏标识下方和使用说明里；在终端也可以用以下命令查看：
+
+```powershell
+python main.py --version
+```
+
+写回版本号并递增时使用：
+
+```powershell
+python build.py --bump patch        # 1.0.0 -> 1.0.1，小更新
+python build.py --bump minor        # 1.0.0 -> 1.1.0，中期更新
+python build.py --bump major        # 1.0.0 -> 2.0.0，大更新
+python build.py --set-version 1.2.0 # 直接指定版本号
+```
+
+`--bump` 和 `--set-version` 会把新版本号写回当前的版本来源（存在 `version.json` 时写回它，否则写回 `pixelconfusion/version.py`），随后执行打包。
+
+## 打包
+
+打包为单个可执行程序需要 PyInstaller，先安装开发依赖：
+
+```powershell
+python -m pip install -r requirements-dev.txt
+```
+
+然后在项目根目录运行：
+
+```powershell
+python build.py
+```
+
+默认输出 `dist/PixelConfusion-1.0.0.exe`，可执行程序内含版本号，文件属性中的版本、产品名称和窗口标题与实际版本一致。常用参数：
+
+| 参数 | 说明 |
+| --- | --- |
+| `--version X.Y.Z` | 仅本次打包使用指定版本号 |
+| `--bump {major,minor,patch}` | 递增版本号、写回来源后打包 |
+| `--set-version X.Y.Z` | 指定版本号、写回来源后打包 |
+| `--print-version` | 只打印解析到的版本号 |
+| `--onedir` | 输出文件夹而不是单文件 |
+| `--console` | 保留控制台窗口，便于排查启动问题 |
+| `--output DIR` | 指定输出目录，默认 `dist` |
+| `--name NAME` | 可执行程序基名，默认 `PixelConfusion` |
+| `--no-version-suffix` | 文件名不附加版本号 |
+| `--clean` | 打包前清理缓存与临时目录 |
+| `--dry-run` | 只打印版本号和 PyInstaller 命令，不执行打包 |
+
+打包产物是 Windows 可执行文件，首次运行可能被 SmartScreen 提示；这不是程序错误，选择“更多信息 → 仍要运行”即可。
+
 ## 验证
 
 ```powershell
 python -m unittest -v
 ```
 
-测试仅使用程序生成的像素，覆盖坐标映射、长方形和细长图片、透明通道、文件保存、两种算法的逐字节往返一致性，以及侧栏与批量参数校验。
+测试仅使用程序生成的像素，覆盖坐标映射、长方形和细长图片、透明通道、文件保存、两种算法的逐字节往返一致性，以及侧栏、批量参数与版本号解析校验。
 
 Gilbert 递归划分改编自 [Jakub Červený 的 gilbert2d](https://github.com/jakubcerveny/gilbert)。授权见 `THIRD_PARTY_NOTICES.txt`。
 

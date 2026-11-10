@@ -8,6 +8,7 @@ from pixelconfusion.ui.images import brand_lockup_photo
 from pixelconfusion.ui.text import make_label
 from pixelconfusion.ui.theme import LINE, LINE_STRONG, MUTED, SURFACE, TEXT_BRIGHT
 from pixelconfusion.ui.widgets import IconButton, Steps
+from pixelconfusion.version import APP_NAME_CN, VERSION
 
 
 class AppBar(tk.Frame):
@@ -27,7 +28,7 @@ class AppBar(tk.Frame):
         title_block.pack(side="left")
         make_label(title_block, "PixelConfusion", 12, "bold", TEXT_BRIGHT,
                    SURFACE).pack(anchor="w")
-        make_label(title_block, "像素混淆器", 8, fg=MUTED,
+        make_label(title_block, f"{APP_NAME_CN} · v{VERSION}", 8, fg=MUTED,
                    bg=SURFACE).pack(anchor="w", pady=(2, 0))
 
         self._right = tk.Frame(self, bg=SURFACE)

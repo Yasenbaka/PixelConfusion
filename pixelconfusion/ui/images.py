@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 from PIL import Image, ImageDraw, ImageTk
 
+from pixelconfusion.paths import RESOURCE_ROOT
 from pixelconfusion.ui.theme import INK, SURFACE
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-ICON_DIR = PROJECT_ROOT / "assets" / "icons"
-BRAND_DIR = PROJECT_ROOT / "assets" / "brand"
+ICON_DIR = RESOURCE_ROOT / "assets" / "icons"
+BRAND_DIR = RESOURCE_ROOT / "assets" / "brand"
 
 _icon_photos: dict[tuple[str, str, int], ImageTk.PhotoImage] = {}
 _icon_bases: dict[str, Image.Image] = {}
@@ -133,7 +131,7 @@ def thumbnail_photo(image: Image.Image, size: int = 64) -> ImageTk.PhotoImage:
 __all__ = [
     "BRAND_DIR",
     "ICON_DIR",
-    "PROJECT_ROOT",
+    "RESOURCE_ROOT",
     "brand_lockup_photo",
     "brand_photo",
     "icon_photo",
