@@ -128,10 +128,11 @@ class ResultPane(tk.Frame):
 
     PAD = 8
     GAP = 8
+    SCROLLBAR_GUTTER = 12
     TILE_WIDTH = 120
     TILE_HEIGHT = 146
 
-    def __init__(self, master, title="结果", direction="reverse", on_open=None):
+    def __init__(self, master, title="结果集", direction="reverse", on_open=None):
         super().__init__(master, bg=SURFACE)
         self._on_open = on_open
         self._direction = direction
@@ -143,9 +144,8 @@ class ResultPane(tk.Frame):
         self._placeholder_subtitle = "生成后会显示在这里"
         self._show_placeholder = True
 
-        header = tk.Frame(self, bg=SURFACE, height=18)
+        header = tk.Frame(self, bg=SURFACE)
         header.pack(fill="x")
-        header.pack_propagate(False)
         self._dot = tk.Canvas(header, width=7, height=7, bg=SURFACE,
                               highlightthickness=0, bd=0)
         self._dot.pack(side="left", padx=(2, 6), pady=(5, 0))
@@ -158,11 +158,16 @@ class ResultPane(tk.Frame):
 
         body = tk.Frame(self, bg=SURFACE)
         body.pack(fill="both", expand=True, pady=(8, 0))
-        self._scrollbar = _ScrollBar(body, command=self._scroll_to)
-        self._scrollbar.pack(side="right", fill="y", padx=(4, 0))
         self._canvas = tk.Canvas(body, bg=SURFACE, highlightthickness=0, bd=0,
                                  yscrollincrement=24)
         self._canvas.pack(side="left", fill="both", expand=True)
+        # The scrollbar floats inside the result well so the solid border keeps
+        # the same outer bounds as the dashed input well.
+        self._scrollbar = _ScrollBar(body, command=self._scroll_to,
+                                     outer_bg=FIELD)
+        self._scrollbar.place(relx=1.0, x=-6, y=6, anchor="ne",
+                              relheight=1.0, height=-12)
+        self._scrollbar.bind("<MouseWheel>", self._on_wheel)
         self._inner = tk.Frame(self._canvas, bg=FIELD)
         self._window = self._canvas.create_window(self.PAD, self.PAD,
                                                   anchor="nw", window=self._inner)
@@ -178,6 +183,13 @@ class ResultPane(tk.Frame):
         self._dot.itemconfigure(self._dot_item, fill=self._accent)
         if title is not None:
             self.set_title(title)
+
+    def set_neutral_title(self, title="结果集"):
+        """Show a direction-neutral heading before a batch is started."""
+        self._direction = None
+        self._accent = FAINT
+        self._dot.itemconfigure(self._dot_item, fill=self._accent)
+        self.set_title(title)
 
     def set_title(self, title):
         self._title.configure(text=title)
@@ -227,15 +239,20 @@ class ResultPane(tk.Frame):
         return len(self._tiles)
 
     # --------------------------------------------------------------- layout
+    def _available_width(self):
+        width = max(self._canvas.winfo_width(),
+                    self.TILE_WIDTH + self.PAD * 2 + self.SCROLLBAR_GUTTER)
+        return width - self.PAD * 2 - self.SCROLLBAR_GUTTER
+
     def _current_columns(self):
-        width = max(self._canvas.winfo_width(), self.TILE_WIDTH + self.PAD * 2)
-        available = width - self.PAD * 2
+        available = self._available_width()
         return max(1, (available + self.GAP) // (self.TILE_WIDTH + self.GAP))
 
     def _on_configure(self, _event=None):
         width = max(self._canvas.winfo_width(), 10)
         height = max(self._canvas.winfo_height(), 10)
-        self._canvas.itemconfigure(self._window, width=max(1, width - self.PAD * 2))
+        inner_width = max(1, width - self.PAD * 2 - self.SCROLLBAR_GUTTER)
+        self._canvas.itemconfigure(self._window, width=inner_width)
         self._canvas.coords(self._window, self.PAD, self.PAD)
         columns = self._current_columns()
         if columns != self._columns:

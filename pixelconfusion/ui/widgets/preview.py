@@ -6,7 +6,7 @@ import tkinter as tk
 
 from pixelconfusion.ui.drawing import dashed_round, draw_round
 from pixelconfusion.ui.images import icon_photo, preview_photo
-from pixelconfusion.ui.text import format_dimensions
+from pixelconfusion.ui.text import format_dimensions, make_label
 from pixelconfusion.ui.theme import (
     ACCENT_LIGHT,
     FAINT,
@@ -40,7 +40,7 @@ class PreviewTile(tk.Frame):
         self._empty_subtitle = "选择图片或使用内置测试图"
         self._empty_icon = "image"
         self._pickable = False
-        header = tk.Frame(self, bg=SURFACE, height=18)
+        header = tk.Frame(self, bg=SURFACE)
         header.pack(fill="x")
         dot = tk.Canvas(header, width=7, height=7, bg=SURFACE, highlightthickness=0,
                         bd=0)
@@ -49,10 +49,8 @@ class PreviewTile(tk.Frame):
             dot.create_oval(1, 1, 6, 6, fill=FAINT, outline="")
         else:
             dot.create_oval(1, 1, 6, 6, fill=INK, outline="")
-        tk.Label(header, text=title, bg=SURFACE, fg=TEXT,
-                 font=ui_font(9, "bold")).pack(side="left")
-        self._dims = tk.Label(header, text="— × —", bg=SURFACE, fg=FAINT,
-                              font=ui_font(8))
+        make_label(header, title, 9, "bold").pack(side="left")
+        self._dims = make_label(header, "— × —", 8, fg=FAINT)
         self._dims.pack(side="right")
         self._well = tk.Canvas(self, bg=SURFACE, highlightthickness=0, bd=0)
         self._well.pack(fill="both", expand=True, pady=(8, 0))

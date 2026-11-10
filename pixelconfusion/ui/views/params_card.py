@@ -116,7 +116,7 @@ class ParamsCard(Card):
             self.method_desc.configure(text="广义希尔伯特曲线 · 支持任意宽高",
                                        fg=MUTED)
             if self._mode == "batch":
-                text = "批量次数由下方“等差迭代次数”控制。"
+                text = "批量次数由上方“等差迭代次数”控制。"
             else:
                 text = "默认使用黄金比例偏移。"
             self.hint.set_text(text)
@@ -130,7 +130,7 @@ class ParamsCard(Card):
                 fg=PINK if bad_size else MUTED,
             )
             if self._mode == "batch":
-                text = "批量次数由下方控制；仅支持正方形图片。"
+                text = "批量次数由上方控制；仅支持正方形图片。"
             else:
                 text = "仅支持正方形图片。"
             self.hint.set_text(text)

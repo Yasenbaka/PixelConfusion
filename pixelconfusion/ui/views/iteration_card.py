@@ -18,13 +18,16 @@ from pixelconfusion.ui.widgets import (
 
 class IterationCard(Card):
     OPTIONS = (
-        ("single", "单次混淆", "rotate"),
-        ("batch", "多次迭代", "grid"),
+        ("single", "单次", "rotate"),
+        ("batch", "多次", "grid"),
     )
+    HEIGHT_SINGLE = 128
+    HEIGHT_BATCH = 276
+    HEIGHT_BATCH_AUTO = 210
 
     def __init__(self, master, *, on_mode_change, on_auto_change, on_next_batch,
                  outer_bg=BG):
-        super().__init__(master, height=112, outer_bg=outer_bg)
+        super().__init__(master, height=self.HEIGHT_SINGLE, outer_bg=outer_bg)
         self.count_var = tk.StringVar(value=str(DEFAULT_BATCH_COUNT))
         self._mode = "single"
         self._auto = False
@@ -68,16 +71,15 @@ class IterationCard(Card):
                                    outer_bg=SURFACE)
         self.toggle.pack(fill="x", pady=(6, 0))
 
-        self.next_row = tk.Frame(self.multi_block, bg=SURFACE, height=28)
-        self.next_row.pack_propagate(False)
-        self.next_button = PillButton(self.next_row, "下一批", small=True,
-                                      kind="secondary", height=28,
-                                      command=self._next_clicked,
+        self.next_row = tk.Frame(self.multi_block, bg=SURFACE)
+        self.next_button = PillButton(self.next_row, "下一批",
+                                      icon="arrow-right", kind="primary",
+                                      height=38, command=self._next_clicked,
                                       outer_bg=SURFACE)
-        self.next_button.pack(side="left")
+        self.next_button.pack(fill="x")
         self.next_button.set_enabled(False)
-        self.next_meta = make_label(self.next_row, "", 7, fg=FAINT)
-        self.next_meta.pack(side="left", padx=(8, 0))
+        self.next_meta = make_label(self.next_row, "", 7, fg=FAINT, anchor="w")
+        self.next_meta.pack(fill="x", pady=(6, 0))
         self.set_mode("single")
 
     # ---------------------------------------------------------------- public
@@ -97,32 +99,35 @@ class IterationCard(Card):
             self.single_hint.pack_forget()
             if not self.multi_block.winfo_manager():
                 self.multi_block.pack(fill="x", pady=(10, 0))
-            self.configure(height=196 if self._auto else 230)
+            self.configure(height=(self.HEIGHT_BATCH_AUTO if self._auto
+                                   else self.HEIGHT_BATCH))
         else:
             self.multi_block.pack_forget()
             if not self.single_hint.winfo_manager():
                 self.single_hint.pack(fill="x", pady=(8, 0))
-            self.configure(height=118)
+            self.configure(height=self.HEIGHT_SINGLE)
 
     def set_auto(self, value: bool):
         self._auto = bool(value)
         self.toggle.set_value(self._auto)
         if self._mode == "batch":
-            self.configure(height=196 if self._auto else 230)
+            self.configure(height=(self.HEIGHT_BATCH_AUTO if self._auto
+                                   else self.HEIGHT_BATCH))
         if self._auto:
             self.next_row.pack_forget()
             self._next_visible = False
         else:
             self._next_visible = True
             if not self.next_row.winfo_manager():
-                self.next_row.pack(fill="x", pady=(6, 0))
+                self.next_row.pack(fill="x", pady=(8, 0))
         self._apply_next_state()
 
     def set_batch_state(self, index: int, start: int, count: int,
                         has_results: bool, can_next: bool, auto: bool):
         self._auto = bool(auto)
         if self._mode == "batch":
-            self.configure(height=196 if self._auto else 230)
+            self.configure(height=(self.HEIGHT_BATCH_AUTO if self._auto
+                                   else self.HEIGHT_BATCH))
         if auto:
             self.next_row.pack_forget()
             self._next_visible = False
@@ -131,7 +136,7 @@ class IterationCard(Card):
             return
         self._next_visible = True
         if not self.next_row.winfo_manager():
-            self.next_row.pack(fill="x", pady=(6, 0))
+            self.next_row.pack(fill="x", pady=(8, 0))
         self._next_allowed = bool(has_results and can_next)
         if has_results and can_next:
             next_start = start + count

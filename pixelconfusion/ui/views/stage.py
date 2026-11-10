@@ -78,7 +78,8 @@ class StageView(Card):
         body.pack(fill="both", expand=True, padx=4, pady=(8, 8))
         body.grid_rowconfigure(0, weight=1)
         body.grid_columnconfigure(0, weight=1, uniform="preview")
-        body.grid_columnconfigure(1, weight=1, uniform="preview")
+        body.grid_columnconfigure(1, minsize=12)
+        body.grid_columnconfigure(2, weight=1, uniform="preview")
         self.body = body
         self.input_tile = PreviewTile(body, "输入", "input", on_pick=on_pick)
         self.output_tile = PreviewTile(body, "结果", "output")
@@ -116,10 +117,10 @@ class StageView(Card):
             self.forward_pane.set_direction("forward", "正向结果集")
             self.reverse_pane.set_meta(range_text)
             self.forward_pane.set_meta(range_text)
-            self.reverse_pane.set_placeholder("正在生成反向结果…", range_text)
-            self.forward_pane.set_placeholder("正在生成正向结果…", range_text)
+            self.reverse_pane.set_placeholder("正在生成反向结果集…", range_text)
+            self.forward_pane.set_placeholder("正在生成正向结果集…", range_text)
         else:
-            label = "反向结果" if direction == "reverse" else "正向结果"
+            label = "反向结果集" if direction == "reverse" else "正向结果集"
             self.forward_pane.set_direction(direction, label)
             self.forward_pane.set_meta(range_text)
             self.forward_pane.set_placeholder(f"正在生成{label}…", range_text)
@@ -163,8 +164,7 @@ class StageView(Card):
             self.reverse_pane.set_placeholder("还没有批量结果", "点击自动混淆开始")
             self.forward_pane.set_placeholder("还没有批量结果", "点击自动混淆开始")
         else:
-            label = "反向结果" if direction == "reverse" else "正向结果"
-            self.forward_pane.set_direction(direction, label)
+            self.forward_pane.set_neutral_title("结果集")
             self.forward_pane.set_meta("")
             self.forward_pane.set_placeholder("还没有批量结果",
                                               "点击正向混淆或反向混淆开始")
@@ -227,15 +227,13 @@ class StageView(Card):
             widget.grid_remove()
         if self._mode == "single":
             self.input_tile.grid(row=0, column=0, sticky="nsew")
-            self.output_tile.grid(row=0, column=1, sticky="nsew", padx=(13, 0))
+            self.output_tile.grid(row=0, column=2, sticky="nsew")
         elif self._auto:
             self.reverse_pane.grid(row=0, column=0, sticky="nsew")
-            self.forward_pane.grid(row=0, column=1, sticky="nsew",
-                                   padx=(13, 0))
+            self.forward_pane.grid(row=0, column=2, sticky="nsew")
         else:
             self.input_tile.grid(row=0, column=0, sticky="nsew")
-            self.forward_pane.grid(row=0, column=1, sticky="nsew",
-                                   padx=(13, 0))
+            self.forward_pane.grid(row=0, column=2, sticky="nsew")
 
     def _apply_actions_visibility(self):
         if self._mode == "single":
@@ -254,9 +252,9 @@ class StageView(Card):
         if self._mode == "single":
             text = "自动适配预览 · 输出保留原始尺寸"
         elif self._auto:
-            text = "正反结果同步显示 · 点击缩略图放大预览"
+            text = "正反结果集同步显示 · 点击缩略图放大预览"
         else:
-            text = "本方向整批结果 · 点击缩略图放大预览"
+            text = "整批结果集 · 点击缩略图放大预览"
         self._head_hint.configure(text=text)
 
 
